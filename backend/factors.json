@@ -1,0 +1,56 @@
+{
+  "sg_electricity": {
+    "name": "Singapore Grid Electricity",
+    "country": "Singapore",
+    "unit": "kWh",
+    "factor_kg": 0.4057,
+    "scope": 2,
+    "source": "EMA Singapore 2025",
+    "label": "SG Electricity"
+  },
+  "sg_petrol": {
+    "name": "Petrol / Gasoline (Singapore)",
+    "country": "Singapore",
+    "unit": "litres",
+    "factor_kg": 2.296,
+    "scope": 1,
+    "source": "IPCC 2006 / NEA Singapore",
+    "label": "SG Petrol"
+  },
+  "sg_diesel": {
+    "name": "Diesel (Singapore)",
+    "country": "Singapore",
+    "unit": "litres",
+    "factor_kg": 2.68,
+    "scope": 1,
+    "source": "IPCC 2006 / NEA Singapore",
+    "label": "SG Diesel"
+  },
+  "my_electricity": {
+    "name": "Malaysia Grid Electricity",
+    "country": "Malaysia",
+    "unit": "kWh",
+    "factor_kg": 0.585,
+    "scope": 2,
+    "source": "Suruhanjaya Tenaga (ST) Malaysia 2025",
+    "label": "MY Electricity"
+  },
+  "my_petrol": {
+    "name": "Petrol / Gasoline (Malaysia)",
+    "country": "Malaysia",
+    "unit": "litres",
+    "factor_kg": 2.296,
+    "scope": 1,
+    "source": "IPCC 2006 / JAS Malaysia",
+    "label": "MY Petrol"
+  },
+  "my_diesel": {
+    "name": "Diesel (Malaysia)",
+    "country": "Malaysia",
+    "unit": "litres",
+    "factor_kg": 2.68,
+    "scope": 1,
+    "source": "IPCC 2006 / JAS Malaysia",
+    "label": "MY Diesel"
+  }
+}

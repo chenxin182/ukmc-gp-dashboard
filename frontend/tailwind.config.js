@@ -4,6 +4,35 @@ export default {
   theme: {
     extend: {
       colors: {
+        ukmc: {
+          50:  '#f0f7ff',
+          100: '#e0effe',
+          200: '#bae0fd',
+          300: '#7cc4fb',
+          400: '#36a4f6',
+          500: '#0c86e8',
+          600: '#0168c6',
+          700: '#0153a1',
+          800: '#064585',
+          900: '#0b3b6f',
+          950: '#07253f',
+        },
+        gold: {
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+        },
+        deal: {
+          discovery: '#6366f1',
+          research:  '#8b5cf6',
+          analysis:  '#0ea5e9',
+          outreach:  '#f59e0b',
+          proposal:  '#f97316',
+          mandate:   '#10b981',
+          closed:    '#22c55e',
+          lost:      '#6b7280',
+        },
         brand: {
           50:  '#E8F5E9',
           100: '#C8E6C9',
@@ -15,12 +44,29 @@ export default {
           900: '#1B5E20',
         },
       },
+      animation: {
+        'fade-in':  'fadeIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn:  { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+        slideUp: { '0%': { opacity: '0', transform: 'translateY(8px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+      },
     },
   },
   plugins: [],
-  // Safelist dynamic classes used in ReportPage
   safelist: [
-    'bg-brand-50', 'bg-orange-50', 'bg-blue-50',
-    'text-brand-800', 'text-orange-700', 'text-blue-700',
+    'bg-deal-discovery','bg-deal-research','bg-deal-analysis',
+    'bg-deal-outreach','bg-deal-proposal','bg-deal-mandate',
+    'bg-deal-closed','bg-deal-lost',
+    'text-deal-discovery','text-deal-research','text-deal-analysis',
+    'text-deal-outreach','text-deal-proposal','text-deal-mandate',
+    'text-deal-closed','text-deal-lost',
+    'border-deal-discovery','border-deal-research','border-deal-analysis',
+    'border-deal-outreach','border-deal-proposal','border-deal-mandate',
+    'border-deal-closed','border-deal-lost',
+    'bg-brand-50','bg-orange-50','bg-blue-50',
+    'text-brand-800','text-orange-700','text-blue-700',
+    'bg-brand-800','bg-brand-900','text-brand-100','text-brand-200',
   ],
 };

@@ -10,17 +10,20 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from calculations import calculate_emissions, get_factors
-from database import engine, get_db
-from models import ActivityData, Base, Company, EmissionRecord
+from database import engine, get_db, SessionLocal
+from models import ActivityData, Base as EsgBase, Company, EmissionRecord
+from deal_models import Base as DealBase
+from deal_routes import router as deal_router
 from report_generator import generate_pdf_report
 
-# Initialise DB tables on startup
-Base.metadata.create_all(bind=engine)
+# Initialise all DB tables on startup
+EsgBase.metadata.create_all(bind=engine)
+DealBase.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="ESG Carbon Accounting API",
-    description="Carbon emissions calculation and PDF reporting for Singapore & Malaysia SMEs.",
-    version="1.0.0",
+    title="UKMC International — Deal Origination & ESG Platform",
+    description="AI-powered deal origination, pipeline management, and ESG carbon reporting.",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -30,6 +33,27 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register origination router
+app.include_router(deal_router)
+
+
+# ── Auto-seed on first launch ─────────────────────────────────────────────────
+
+def _needs_seed(db: Session) -> bool:
+    from deal_models import Deal
+    return db.query(Deal).count() == 0
+
+
+@app.on_event("startup")
+def startup_event():
+    db = SessionLocal()
+    try:
+        if _needs_seed(db):
+            from seed_data import seed_all
+            seed_all(db)
+    finally:
+        db.close()
 
 
 # ── Pydantic schemas ──────────────────────────────────────────────────────────
@@ -46,22 +70,25 @@ class CalculateRequest(BaseModel):
     activities: List[ActivityInput]
 
 
-# ── Routes ────────────────────────────────────────────────────────────────────
+# ── ESG Routes ────────────────────────────────────────────────────────────────
 
 @app.get("/")
 def root():
-    return {"message": "ESG Carbon Accounting API", "docs": "/docs", "version": "1.0.0"}
+    return {
+        "message": "UKMC International — Deal Origination & ESG Platform",
+        "docs": "/docs",
+        "version": "2.0.0",
+        "modules": ["deal-origination", "esg-carbon"],
+    }
 
 
 @app.get("/api/factors")
 def list_factors():
-    """Return all available emission factors."""
     return get_factors()
 
 
-@app.get("/api/companies")
-def list_companies(db: Session = Depends(get_db)):
-    """Return all saved companies."""
+@app.get("/api/esg/companies")
+def list_esg_companies(db: Session = Depends(get_db)):
     rows = db.query(Company).order_by(Company.created_at.desc()).all()
     return [
         {"id": c.id, "name": c.name, "country": c.country, "created_at": c.created_at}
@@ -71,25 +98,17 @@ def list_companies(db: Session = Depends(get_db)):
 
 @app.post("/api/calculate")
 def calculate(request: CalculateRequest, db: Session = Depends(get_db)):
-    """
-    Calculate Scope 1 & 2 GHG emissions from a list of activity data.
-    Persists the result to SQLite and returns the full calculation detail.
-    """
     try:
-        result = calculate_emissions(
-            request.company_name, request.country, request.activities
-        )
+        result = calculate_emissions(request.company_name, request.country, request.activities)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
-    # Upsert company
     company = db.query(Company).filter_by(name=request.company_name).first()
     if not company:
         company = Company(name=request.company_name, country=request.country)
         db.add(company)
         db.flush()
 
-    # Persist emission record
     record = EmissionRecord(
         company_id=company.id,
         total_emissions=result["total_emissions"],
@@ -116,13 +135,8 @@ def calculate(request: CalculateRequest, db: Session = Depends(get_db)):
 
 @app.post("/api/report")
 def generate_report(request: CalculateRequest):
-    """
-    Calculate emissions and return a PDF report as a binary stream.
-    """
     try:
-        result = calculate_emissions(
-            request.company_name, request.country, request.activities
-        )
+        result = calculate_emissions(request.company_name, request.country, request.activities)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 

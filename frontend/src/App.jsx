@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BrowserRouter, NavLink, Route, Routes, useNavigate } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import DataEntry from './components/DataEntry';
+import DealRadarPage from './components/DealRadar/DealRadarPage';
 import ReportPage from './components/ReportPage';
 
 function NavBar() {
@@ -16,13 +17,14 @@ function NavBar() {
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-2xl">🌿</span>
-          <span className="text-white font-bold text-lg">ESG Carbon Accounting</span>
-          <span className="text-brand-200 text-xs ml-2 hidden sm:inline">SG · MY | GHG Protocol</span>
+          <span className="text-white font-bold text-lg">UKMC GP Dashboard</span>
+          <span className="text-brand-200 text-xs ml-2 hidden sm:inline">ESG · Deal Radar</span>
         </div>
         <div className="flex gap-1">
           <NavLink to="/" end className={cls}>Data Entry</NavLink>
           <NavLink to="/dashboard" className={cls}>Dashboard</NavLink>
           <NavLink to="/report" className={cls}>Report</NavLink>
+          <NavLink to="/deal-radar" className={cls}>📡 Deal Radar</NavLink>
         </div>
       </div>
     </nav>
@@ -74,6 +76,7 @@ function AppContent() {
                 : <NoData label="Complete a calculation on the Data Entry page first." />
             }
           />
+          <Route path="/deal-radar" element={<DealRadarPage />} />
         </Routes>
       </main>
     </>

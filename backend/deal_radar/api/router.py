@@ -52,6 +52,7 @@ class InferenceOut(BaseModel):
     emoji: str
     reasoning: str
     triggered_signals: list
+    triggered_signals_types: List[str]   # signal type names, resolved for frontend
     created_at: datetime
 
 
@@ -77,6 +78,20 @@ class ScoreRequest(BaseModel):
 def _inference_out(inf: Inference, db: Session) -> InferenceOut:
     company = db.get(Company, inf.company_id)
     band = classify_score(int(inf.confidence_score))
+
+    # Resolve signal IDs → signal types for the frontend
+    sig_ids = inf.triggered_signals or []
+    sig_types: List[str] = []
+    if sig_ids:
+        rows = db.query(Signal).filter(Signal.id.in_(sig_ids)).all()
+        id_to_type = {s.id: s.signal_type for s in rows}
+        seen: set = set()
+        for sid in sig_ids:
+            t = id_to_type.get(sid)
+            if t and t not in seen:
+                sig_types.append(t)
+                seen.add(t)
+
     return InferenceOut(
         id=inf.id,
         company_id=inf.company_id,
@@ -86,7 +101,8 @@ def _inference_out(inf: Inference, db: Session) -> InferenceOut:
         priority=band["level"],
         emoji=band["emoji"],
         reasoning=inf.reasoning,
-        triggered_signals=inf.triggered_signals or [],
+        triggered_signals=sig_ids,
+        triggered_signals_types=sig_types,
         created_at=inf.created_at,
     )
 

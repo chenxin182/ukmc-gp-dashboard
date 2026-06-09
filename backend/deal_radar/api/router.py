@@ -251,3 +251,66 @@ def trigger_delivery(db: Session = Depends(get_db)):
     from deal_radar.agents.delivery_agent import run_delivery_agent
     digest = run_delivery_agent(db)
     return {"status": "ok", "digest_chars": len(digest)}
+
+
+# ── Backtest ──────────────────────────────────────────────────────────────────
+
+@router.get("/backtest")
+def run_backtest_api(
+    mode: str = "simulation",
+    db: Session = Depends(get_db),
+):
+    """
+    Run backtest and return structured results.
+    mode: simulation | feedback | both
+    """
+    if mode not in ("simulation", "feedback", "both"):
+        raise HTTPException(status_code=422, detail="mode must be simulation | feedback | both")
+    from deal_radar.backtest import run_backtest, _run_simulation, suggest_weight_adjustments
+    return run_backtest(db, mode=mode)
+
+
+@router.get("/backtest/simulation")
+def backtest_simulation_detail(db: Session = Depends(get_db)):
+    """Return per-company simulation results as structured JSON."""
+    from deal_radar.backtest import _run_simulation, suggest_weight_adjustments
+    results = _run_simulation(db)
+    rows = [
+        {
+            "company": r.company,
+            "round_type": r.round_type,
+            "amount_usd_m": r.amount_m,
+            "signals": r.signals,
+            "score": r.score,
+            "band": r.band,
+            "detected": r.predicted_positive,
+        }
+        for r in results
+    ]
+    hits = [r for r in results if r.predicted_positive]
+    return {
+        "total": len(results),
+        "detected": len(hits),
+        "recall": round(len(hits) / len(results), 3) if results else 0,
+        "results": rows,
+        "weight_suggestions": suggest_weight_adjustments(results),
+    }
+
+
+# ── Funding events (backtest ground truth) ───────────────────────────────────
+
+@router.get("/funding-events")
+def list_funding_events(db: Session = Depends(get_db)):
+    from deal_radar.db.models import FundingEvent
+    events = db.query(FundingEvent).order_by(FundingEvent.announced_date.desc()).all()
+    return [
+        {
+            "id": e.id,
+            "company_name": e.company_name,
+            "round_type": e.round_type,
+            "amount_usd_m": round(e.amount_usd / 1_000_000, 1) if e.amount_usd else None,
+            "announced_date": e.announced_date.date().isoformat() if e.announced_date else None,
+            "source_url": e.source_url,
+        }
+        for e in events
+    ]

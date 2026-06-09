@@ -196,6 +196,67 @@ def cmd_backtest(args):
     db.close()
 
 
+# ── calibrate ────────────────────────────────────────────────────────────────
+
+def cmd_calibrate(args):
+    """
+    Run backtest with current weights, then optionally apply suggestions.
+    Saves adjustments to scoring/weights_override.json.
+    """
+    from deal_radar.backtest import _run_simulation, suggest_weight_adjustments
+    from deal_radar.scoring.rules import SIGNAL_WEIGHTS, save_weights_override
+
+    db = _db()
+    results = _run_simulation(db)
+    db.close()
+
+    hits_before = sum(1 for r in results if r.predicted_positive)
+    recall_before = hits_before / len(results) if results else 0
+
+    suggestions = suggest_weight_adjustments(results)
+    weight_changes = suggestions.get("weight_suggestions", {})
+
+    print(f"\nCurrent weights: {dict(SIGNAL_WEIGHTS)}")
+    print(f"Backtest recall (before): {recall_before:.1%} ({hits_before}/{len(results)})")
+
+    if not weight_changes:
+        print("✓ No calibration needed — model is well-fit to simulation data.")
+        return
+
+    print(f"\nSuggested weight changes:")
+    new_weights = {}
+    for sig, info in weight_changes.items():
+        print(f"  {sig}: {info['current_weight']} → {info['suggested_weight']} "
+              f"(missed {info['missed_cases']}x)")
+        new_weights[sig] = info["suggested_weight"]
+
+    dry_run = getattr(args, "dry_run", False)
+    if dry_run:
+        print("\n[dry-run] No changes written.")
+        return
+
+    save_weights_override(new_weights)
+
+    # Reload and re-evaluate
+    import importlib
+    import deal_radar.scoring.rules as rules_mod
+    importlib.reload(rules_mod)
+
+    from deal_radar.scoring.rules import compute_score, classify_score
+    from deal_radar.backtest import SimResult
+
+    hits_after = 0
+    for r in results:
+        score = compute_score(r.signals)
+        if score >= 60:
+            hits_after += 1
+
+    recall_after = hits_after / len(results) if results else 0
+    print(f"\nCalibrated weights written to scoring/weights_override.json")
+    print(f"Backtest recall (after):  {recall_after:.1%} ({hits_after}/{len(results)})")
+    print(f"Improvement:              +{(recall_after - recall_before)*100:.1f}pp\n")
+
+
 # ── seed ──────────────────────────────────────────────────────────────────────
 
 def cmd_seed(_args):
@@ -263,6 +324,11 @@ def build_parser() -> argparse.ArgumentParser:
     bt = sub.add_parser("backtest")
     bt.add_argument("--mode", choices=["simulation", "feedback", "both"], default="simulation")
 
+    # calibrate
+    cal = sub.add_parser("calibrate", help="Run backtest and optionally apply weight suggestions")
+    cal.add_argument("--dry-run", dest="dry_run", action="store_true",
+                     help="Show suggestions without writing weights_override.json")
+
     # seed
     sub.add_parser("seed")
 
@@ -279,8 +345,9 @@ DISPATCH = {
     ("inference", "list"):     cmd_inference_list,
     ("digest",    "preview"):  cmd_digest_preview,
     ("digest",    "send"):     cmd_digest_send,
-    ("backtest",  None):       cmd_backtest,
-    ("seed",      None):       cmd_seed,
+    ("backtest",   None):      cmd_backtest,
+    ("calibrate",  None):      cmd_calibrate,
+    ("seed",       None):      cmd_seed,
 }
 
 

@@ -1,0 +1,51 @@
+company_name,round_type,amount_usd,announced_date,source_url,notes
+OpenAI,series_c,10000000000,2023-01-23,https://techcrunch.com/2023/01/23/microsoft-openai-deal,Microsoft strategic
+Anthropic,series_c,450000000,2023-05-23,https://techcrunch.com/2023/05/23/anthropic-series-c,Google backed
+Mistral AI,seed,113000000,2023-06-13,https://techcrunch.com/2023/06/13/mistral-ai-seed,European LLM lab
+Mistral AI,series_a,415000000,2023-12-11,https://techcrunch.com/2023/12/11/mistral-series-a,
+Cohere,series_c,270000000,2023-06-08,https://techcrunch.com/2023/06/08/cohere-series-c,Enterprise NLP
+Inflection AI,series_b,1300000000,2023-06-29,https://techcrunch.com/2023/06/29/inflection-ai-series-b,Pi assistant
+Adept AI,series_b,350000000,2023-03-14,https://techcrunch.com/2023/03/14/adept-series-b,Workflow automation
+Character AI,series_a,150000000,2023-03-23,https://techcrunch.com/2023/03/23/character-ai-series-a,
+Perplexity AI,series_a,73500000,2024-01-04,https://techcrunch.com/2024/01/04/perplexity-series-a,AI search
+Perplexity AI,series_b,250000000,2024-04-23,https://techcrunch.com/2024/04/23/perplexity-series-b,
+Together AI,series_a,102500000,2023-11-29,https://techcrunch.com/2023/11/29/together-ai-series-a,Open model infra
+Imbue,series_b,200000000,2023-09-12,https://techcrunch.com/2023/09/12/imbue-series-b,AI reasoning
+Runway,series_c,141000000,2023-06-26,https://techcrunch.com/2023/06/26/runway-series-c,Video generation
+ElevenLabs,series_b,80000000,2024-01-22,https://techcrunch.com/2024/01/22/elevenlabs-series-b,Voice AI
+ElevenLabs,series_c,180000000,2024-06-21,https://techcrunch.com/2024/06/21/elevenlabs-series-c,
+Pika Labs,series_a,55000000,2023-12-19,https://techcrunch.com/2023/12/19/pika-series-a,Video gen
+Ideogram,series_a,80000000,2023-08-23,https://techcrunch.com/2023/08/23/ideogram-series-a,Image gen
+Stability AI,series_a,101000000,2022-10-17,https://techcrunch.com/2022/10/17/stability-ai-series-a,Stable Diffusion
+Midjourney,seed,0,2022-07-12,https://techcrunch.com/2022/07/12/midjourney-launch,Bootstrapped
+Inflection AI,seed,225000000,2022-11-02,https://techcrunch.com/2022/11/02/inflection-ai-seed,
+HuggingFace,series_d,235000000,2023-08-24,https://techcrunch.com/2023/08/24/huggingface-series-d,
+Replit,series_b,97400000,2023-04-25,https://techcrunch.com/2023/04/25/replit-series-b,AI coding
+Codeium,series_b,65000000,2023-08-14,https://techcrunch.com/2023/08/14/codeium-series-b,AI coding
+Tabnine,series_b,25000000,2022-06-15,https://techcrunch.com/2022/06/15/tabnine-series-b,AI coding
+Magic AI,series_a,23000000,2023-02-28,https://techcrunch.com/2023/02/28/magic-ai-series-a,AI coding
+Cognition AI,series_a,21000000,2024-03-12,https://techcrunch.com/2024/03/12/cognition-ai-devin,AI coding agent
+Continue.dev,seed,8000000,2024-01-10,https://techcrunch.com/2024/01/10/continue-dev-seed,Open source coding
+Qdrant,series_a,28000000,2023-11-09,https://techcrunch.com/2023/11/09/qdrant-series-a,Vector DB
+Pinecone,series_b,100000000,2023-04-27,https://techcrunch.com/2023/04/27/pinecone-series-b,Vector DB
+Weaviate,series_b,50000000,2023-04-25,https://techcrunch.com/2023/04/25/weaviate-series-b,Vector DB
+Chroma,seed,18000000,2023-09-27,https://techcrunch.com/2023/09/27/chroma-seed,Open source vector DB
+Weights & Biases,series_c,200000000,2022-08-31,https://techcrunch.com/2022/08/31/wandb-series-c,MLOps
+Scale AI,series_f,1000000000,2024-05-23,https://techcrunch.com/2024/05/23/scale-ai-series-f,Data labeling
+Labelbox,series_d,100000000,2022-01-12,https://techcrunch.com/2022/01/12/labelbox-series-d,Data labeling
+Snorkel AI,series_c,135000000,2022-09-20,https://techcrunch.com/2022/09/20/snorkel-series-c,Data-centric AI
+Cleanlab,series_a,30000000,2023-08-01,https://techcrunch.com/2023/08/01/cleanlab-series-a,Data quality AI
+Vectara,series_a,28500000,2023-11-08,https://techcrunch.com/2023/11/08/vectara-series-a,RAG platform
+LlamaIndex,seed,8500000,2023-09-07,https://techcrunch.com/2023/09/07/llamaindex-seed,RAG framework
+LangChain,series_a,25000000,2023-09-19,https://techcrunch.com/2023/09/19/langchain-series-a,LLM framework
+Fireworks AI,series_a,25000000,2023-10-04,https://techcrunch.com/2023/10/04/fireworks-ai-series-a,LLM inference
+Groq,series_c,367000000,2024-08-05,https://techcrunch.com/2024/08/05/groq-series-c,LLM chip
+Cerebras,series_f,250000000,2024-08-28,https://techcrunch.com/2024/08/28/cerebras-series-f,AI chip
+SambaNova,series_d,676000000,2023-11-30,https://techcrunch.com/2023/11/30/sambanova-series-d,AI chip
+Anyscale,series_c,99000000,2022-08-17,https://techcrunch.com/2022/08/17/anyscale-series-c,Ray distributed AI
+Modal,series_a,16000000,2023-01-12,https://techcrunch.com/2023/01/12/modal-series-a,Serverless AI
+Replicate,series_a,40000000,2023-04-18,https://techcrunch.com/2023/04/18/replicate-series-a,Model deployment
+Baseten,series_b,40000000,2023-10-24,https://techcrunch.com/2023/10/24/baseten-series-b,ML deployment
+Dify.ai,series_a,10000000,2024-04-11,https://techcrunch.com/2024/04/11/dify-series-a,LLM app platform
+Dust,seed,5000000,2023-05-22,https://techcrunch.com/2023/05/22/dust-seed,Enterprise AI assistant
+Glean,series_d,200000000,2024-02-27,https://techcrunch.com/2024/02/27/glean-series-d,Enterprise search AI

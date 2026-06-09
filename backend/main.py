@@ -1,4 +1,5 @@
 import io
+from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import List
 
@@ -14,13 +15,27 @@ from database import engine, get_db
 from models import ActivityData, Base, Company, EmissionRecord
 from report_generator import generate_pdf_report
 
-# Initialise DB tables on startup
+# Deal Radar
+from deal_radar.db.database import init_db as dr_init_db
+from deal_radar.api.router import router as dr_router
+from deal_radar.scheduler import start_scheduler, stop_scheduler
+
 Base.metadata.create_all(bind=engine)
+dr_init_db()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler()
+    yield
+    stop_scheduler()
+
 
 app = FastAPI(
-    title="ESG Carbon Accounting API",
-    description="Carbon emissions calculation and PDF reporting for Singapore & Malaysia SMEs.",
-    version="1.0.0",
+    title="UKMC GP Dashboard API",
+    description="ESG Carbon Accounting + Deal Radar capital intelligence.",
+    version="2.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -31,8 +46,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount Deal Radar routes under /dr/*
+app.include_router(dr_router)
 
-# ── Pydantic schemas ──────────────────────────────────────────────────────────
+
+# ── ESG Carbon Accounting schemas ─────────────────────────────────────────────
 
 class ActivityInput(BaseModel):
     energy_type: str
@@ -46,22 +64,25 @@ class CalculateRequest(BaseModel):
     activities: List[ActivityInput]
 
 
-# ── Routes ────────────────────────────────────────────────────────────────────
+# ── ESG Routes ────────────────────────────────────────────────────────────────
 
 @app.get("/")
 def root():
-    return {"message": "ESG Carbon Accounting API", "docs": "/docs", "version": "1.0.0"}
+    return {
+        "message": "UKMC GP Dashboard API",
+        "modules": ["ESG Carbon Accounting", "Deal Radar"],
+        "docs": "/docs",
+        "version": "2.0.0",
+    }
 
 
 @app.get("/api/factors")
 def list_factors():
-    """Return all available emission factors."""
     return get_factors()
 
 
 @app.get("/api/companies")
 def list_companies(db: Session = Depends(get_db)):
-    """Return all saved companies."""
     rows = db.query(Company).order_by(Company.created_at.desc()).all()
     return [
         {"id": c.id, "name": c.name, "country": c.country, "created_at": c.created_at}
@@ -71,25 +92,17 @@ def list_companies(db: Session = Depends(get_db)):
 
 @app.post("/api/calculate")
 def calculate(request: CalculateRequest, db: Session = Depends(get_db)):
-    """
-    Calculate Scope 1 & 2 GHG emissions from a list of activity data.
-    Persists the result to SQLite and returns the full calculation detail.
-    """
     try:
-        result = calculate_emissions(
-            request.company_name, request.country, request.activities
-        )
+        result = calculate_emissions(request.company_name, request.country, request.activities)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
-    # Upsert company
     company = db.query(Company).filter_by(name=request.company_name).first()
     if not company:
         company = Company(name=request.company_name, country=request.country)
         db.add(company)
         db.flush()
 
-    # Persist emission record
     record = EmissionRecord(
         company_id=company.id,
         total_emissions=result["total_emissions"],
@@ -116,13 +129,8 @@ def calculate(request: CalculateRequest, db: Session = Depends(get_db)):
 
 @app.post("/api/report")
 def generate_report(request: CalculateRequest):
-    """
-    Calculate emissions and return a PDF report as a binary stream.
-    """
     try:
-        result = calculate_emissions(
-            request.company_name, request.country, request.activities
-        )
+        result = calculate_emissions(request.company_name, request.country, request.activities)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 

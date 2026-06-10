@@ -1,6 +1,18 @@
+# ESG Carbon Accounting
 fastapi==0.111.0
 uvicorn[standard]==0.29.0
 sqlalchemy==2.0.30
 pydantic==2.7.1
 reportlab==4.2.0
 python-multipart==0.0.9
+
+# Deal Radar additions
+httpx==0.27.0
+apscheduler==3.10.4
+python-dotenv==1.0.1
+
+# Testing
+pytest==8.3.5
+
+# Optional: embedding-based inference (install separately if GPU available)
+# sentence-transformers==3.0.1

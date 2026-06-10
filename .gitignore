@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.db
+*.db-journal
+.env
+backend/deal_radar/scoring/weights_override.json
+node_modules/
+dist/

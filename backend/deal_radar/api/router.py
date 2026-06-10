@@ -69,6 +69,12 @@ class SignalOut(BaseModel):
     captured_at: datetime
 
 
+class SignalInject(BaseModel):
+    signal_type: str
+    source_url: Optional[str] = ""
+    raw_data: Optional[dict] = None
+
+
 class ScoreRequest(BaseModel):
     signal_types: List[str]
 
@@ -203,6 +209,36 @@ def submit_feedback(
 
 
 # ── Signal endpoints ──────────────────────────────────────────────────────────
+
+@router.post("/companies/{company_id}/signals", response_model=SignalOut, status_code=201)
+def inject_signal(
+    company_id: int,
+    payload: SignalInject,
+    db: Session = Depends(get_db),
+):
+    """Manually inject a signal — for bootstrapping, testing, or human intelligence."""
+    from deal_radar.scoring.rules import SIGNAL_WEIGHTS
+    if not db.get(Company, company_id):
+        raise HTTPException(status_code=404, detail="Company not found")
+    if payload.signal_type not in SIGNAL_WEIGHTS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Unknown signal_type. Valid: {list(SIGNAL_WEIGHTS.keys())}",
+        )
+    raw = dict(payload.raw_data or {})
+    raw.setdefault("note", "manually injected via API")
+    sig = Signal(
+        company_id=company_id,
+        signal_type=payload.signal_type,
+        source_url=payload.source_url or "",
+        raw_data=raw,
+        captured_at=datetime.utcnow(),
+    )
+    db.add(sig)
+    db.commit()
+    db.refresh(sig)
+    return sig
+
 
 @router.get("/signals/{company_id}", response_model=List[SignalOut])
 def get_company_signals(

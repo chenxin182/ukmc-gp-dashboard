@@ -105,6 +105,49 @@ def cmd_signals_run(_args):
     db.close()
 
 
+def cmd_signals_inject(args):
+    """Manually inject a signal — useful for bootstrapping and testing."""
+    import json
+    from deal_radar.db.models import Signal
+    from deal_radar.scoring.rules import SIGNAL_WEIGHTS
+
+    valid_types = list(SIGNAL_WEIGHTS.keys())
+    if args.signal_type not in valid_types:
+        print(f"Unknown signal type '{args.signal_type}'.")
+        print(f"Valid types: {', '.join(valid_types)}")
+        return
+
+    db = _db()
+    company = db.get(Company, args.company_id)
+    if not company:
+        print(f"Company id={args.company_id} not found.")
+        db.close()
+        return
+
+    raw = {}
+    if getattr(args, "data", None):
+        try:
+            raw = json.loads(args.data)
+        except json.JSONDecodeError:
+            print("--data must be valid JSON string, e.g. '{\"note\": \"manual\"}'")
+            db.close()
+            return
+
+    raw.setdefault("note", "manually injected")
+    sig = Signal(
+        company_id=args.company_id,
+        signal_type=args.signal_type,
+        source_url=getattr(args, "source_url", "") or "",
+        raw_data=raw,
+        captured_at=datetime.utcnow(),
+    )
+    db.add(sig)
+    db.commit()
+    db.refresh(sig)
+    print(f"✓ Signal #{sig.id} injected: [{args.signal_type}] for '{company.name}'")
+    db.close()
+
+
 def cmd_signals_show(args):
     db = _db()
     company = db.get(Company, args.company_id)
@@ -302,9 +345,19 @@ def build_parser() -> argparse.ArgumentParser:
     sg = sub.add_parser("signals")
     sg_sub = sg.add_subparsers(dest="action", required=True)
     sg_sub.add_parser("run")
+
     sg_show = sg_sub.add_parser("show")
     sg_show.add_argument("company_id", type=int)
     sg_show.add_argument("--days", type=int, default=30)
+
+    sg_inject = sg_sub.add_parser("inject", help="Manually inject a signal for testing/bootstrapping")
+    sg_inject.add_argument("company_id", type=int)
+    sg_inject.add_argument("signal_type",
+                           choices=["hire_finance_ir", "hire_infra_burst", "github_commit_spike",
+                                    "founder_vc_interact", "website_update", "pr_activity_surge",
+                                    "team_expansion", "news"])
+    sg_inject.add_argument("--source-url", dest="source_url", default="")
+    sg_inject.add_argument("--data", default=None, help="JSON string with extra raw_data fields")
 
     # inference
     inf = sub.add_parser("inference")
@@ -341,6 +394,7 @@ DISPATCH = {
     ("companies", "remove"):   cmd_companies_remove,
     ("signals",   "run"):      cmd_signals_run,
     ("signals",   "show"):     cmd_signals_show,
+    ("signals",   "inject"):   cmd_signals_inject,
     ("inference", "run"):      cmd_inference_run,
     ("inference", "list"):     cmd_inference_list,
     ("digest",    "preview"):  cmd_digest_preview,

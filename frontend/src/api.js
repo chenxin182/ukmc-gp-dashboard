@@ -40,8 +40,10 @@ export const dr = {
   addCompany:         (data)        => _post('/dr/companies', data).then(r => r.json()),
   removeCompany:      (id)          => _del(`/dr/companies/${id}`),
 
-  getInferencesToday: (minScore=40) => _get(`/dr/inferences/today?min_score=${minScore}`).then(r => r.json()),
-  getInferences:      (days=7, min=0) => _get(`/dr/inferences?days=${days}&min_score=${min}`).then(r => r.json()),
+  getInferencesToday: (minScore=40)    => _get(`/dr/inferences/today?min_score=${minScore}`).then(r => r.json()),
+  getInferences:      (days=7, min=0)  => _get(`/dr/inferences?days=${days}&min_score=${min}`).then(r => r.json()),
+  injectSignal:       (companyId, type, sourceUrl='', rawData={}) =>
+    _post(`/dr/companies/${companyId}/signals`, { signal_type: type, source_url: sourceUrl, raw_data: rawData }).then(r => r.json()),
 
   getSignals:         (companyId, days=30) => _get(`/dr/signals/${companyId}?days=${days}`).then(r => r.json()),
 

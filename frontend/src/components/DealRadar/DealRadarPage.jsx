@@ -22,6 +22,7 @@ export default function DealRadarPage() {
   const [inferences, setInferences] = useState([]);
   const [companies, setCompanies]   = useState([]);
   const [minScore, setMinScore]     = useState(40);
+  const [days, setDays]             = useState(7);
   const [loading, setLoading]       = useState(true);
   const [runStatus, setRunStatus]   = useState(null);  // {msg, type}
   const [showAdd, setShowAdd]       = useState(false);
@@ -31,7 +32,7 @@ export default function DealRadarPage() {
     setLoading(true);
     try {
       const [infs, cos] = await Promise.all([
-        dr.getInferencesToday(minScore),
+        dr.getInferences(days, minScore),
         dr.getCompanies(),
       ]);
       setInferences(infs);
@@ -43,7 +44,7 @@ export default function DealRadarPage() {
     }
   }, [minScore]);
 
-  useEffect(() => { refresh(); }, [refresh]);
+  useEffect(() => { refresh(); }, [refresh, days]);
 
   async function runAgents() {
     setAgentsRunning(true);
@@ -118,19 +119,30 @@ export default function DealRadarPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Inferences list */}
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
               <span className="text-sm text-gray-500">
                 {loading ? '加载中…' : `${inferences.length} 条情报`}
               </span>
-              <select
-                value={minScore}
-                onChange={e => setMinScore(Number(e.target.value))}
-                className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600 ml-auto"
-              >
-                <option value={40}>分数 ≥ 40</option>
-                <option value={60}>分数 ≥ 60</option>
-                <option value={80}>分数 ≥ 80</option>
-              </select>
+              <div className="flex gap-2 ml-auto">
+                <select
+                  value={days}
+                  onChange={e => setDays(Number(e.target.value))}
+                  className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600"
+                >
+                  <option value={1}>过去24小时</option>
+                  <option value={7}>过去7天</option>
+                  <option value={30}>过去30天</option>
+                </select>
+                <select
+                  value={minScore}
+                  onChange={e => setMinScore(Number(e.target.value))}
+                  className="text-xs border border-gray-200 rounded px-2 py-1 text-gray-600"
+                >
+                  <option value={40}>分数 ≥ 40</option>
+                  <option value={60}>分数 ≥ 60</option>
+                  <option value={80}>分数 ≥ 80</option>
+                </select>
+              </div>
             </div>
 
             {loading ? (
